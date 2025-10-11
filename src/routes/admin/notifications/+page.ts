@@ -1,10 +1,9 @@
 import { apiFetch } from '$lib/api';
 import type { PageLoad } from './$types';
 
-export const load: PageLoad = async () => {
+export const load: PageLoad = async ({ fetch }) => { // { fetch } eklendi
     try {
-        // Backend'deki admin endpoint'ine istek atıyoruz.
-        const response = await apiFetch('/admin/notifications?status=pending');
+        const response = await apiFetch('/admin/notifications?status=pending', {}, fetch); // fetch gönderildi
         if (!response.ok) {
             const error = await response.json();
             throw new Error(error.message || 'Failed to fetch notifications');

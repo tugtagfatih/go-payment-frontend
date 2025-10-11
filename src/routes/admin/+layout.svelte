@@ -4,7 +4,8 @@
         <nav>
             <a href="/admin/notifications">Ödeme Bildirimleri</a>
             <a href="/admin/withdrawals">Para Çekme Talepleri</a>
-            <a href="/admin/users">Kullanıcı Yönetimi</a>
+            <a href="/admin/roles">Rol Yönetimi</a>
+            <a href="/admin/users">Kullanıcı Banlama</a>
         </nav>
         <hr/>
         <a href="/" class="back-to-site">← Ana Siteye Dön</a>
@@ -48,7 +49,6 @@
         background-color: #e4e6eb;
     }
     .admin-sidebar .back-to-site {
-        margin-top: auto; /* Dibi itmek için */
         padding-top: 2rem;
         text-decoration: none;
         color: #606770;

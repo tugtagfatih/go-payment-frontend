@@ -1,9 +1,11 @@
 import { apiFetch } from '$lib/api';
 import type { PageLoad } from './$types';
 
-export const load: PageLoad = async () => {
+// load fonksiyonuna { fetch } parametresini ekleyin
+export const load: PageLoad = async ({ fetch }) => {
     try {
-        const response = await apiFetch('/admin/withdrawals?status=pending');
+        // apiFetch'e fetch'i üçüncü parametre olarak gönderin
+        const response = await apiFetch('/admin/withdrawals?status=pending', {}, fetch);
         if (!response.ok) {
             const error = await response.json();
             throw new Error(error.message || 'Failed to fetch withdrawal requests');

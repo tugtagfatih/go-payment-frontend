@@ -1,11 +1,9 @@
 import { apiFetch } from '$lib/api';
 import type { PageLoad } from './$types';
 
-export const load: PageLoad = async () => {
+export const load: PageLoad = async ({ fetch }) => { // { fetch } eklendi
 	try {
-		// Bu endpoint, giriş yapanın rolüne göre (admin veya master_admin)
-		// yönetebileceği kullanıcıları otomatik olarak döndürür.
-		const response = await apiFetch('/admin/manageable-users');
+		const response = await apiFetch('/admin/manageable-users', {}, fetch); // fetch gönderildi
 		if (!response.ok) {
 			const error = await response.json();
 			throw new Error(error.error || 'Failed to fetch manageable users');

@@ -12,8 +12,17 @@
 			{/if}
 
 			<a href="/listings/new">Yeni İlan Oluştur</a>
-			<a href="/wallet">Cüzdanım</a> <button on:click={logout}>Çıkış Yap</button>
-		{:else}
+			<a href="/wallet">Cüzdanım</a>
+			<a href="/profile">Profilim</a>
+
+            <div class="nav-right">
+                <div class="user-info">
+                    <strong>{$authStore.username}</strong>
+                    <span>{$authStore.email}</span>
+                </div>
+                <button on:click={logout}>Çıkış Yap</button>
+            </div>
+            {:else}
 			<a href="/login">Giriş Yap</a>
 		{/if}
 	</nav>
@@ -38,8 +47,31 @@
 		text-decoration: none;
 		font-weight: bold;
 	}
+
+    /* YENİ VE GÜNCELLENEN STİLLER */
+    .nav-right {
+        margin-left: auto; /* Bu grup en sağa yaslanır */
+        display: flex;
+        align-items: center;
+        gap: 1rem;
+    }
+
+    .user-info {
+        display: flex;
+        flex-direction: column;
+        color: white;
+        text-align: right;
+        line-height: 1.2;
+    }
+
+    .user-info span {
+        font-size: 0.8rem;
+        font-weight: normal;
+        opacity: 0.85;
+    }
+
 	nav button {
-		margin-left: auto; /* Çıkış yap butonunu en sağa yaslar */
+		margin-left: 0; /* Otomatik yaslamayı kaldırıyoruz */
 		background: none;
 		border: 1px solid white;
 		color: white;
@@ -48,4 +80,3 @@
 		cursor: pointer;
 	}
 </style>
-

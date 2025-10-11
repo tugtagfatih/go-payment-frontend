@@ -1,6 +1,7 @@
 <script lang="ts">
 	import { goto } from '$app/navigation';
 	import { login } from '$lib/authStore';
+	import { API_BASE_URL } from '$lib/constants';
 
 	let email = '';
 	let password = '';
@@ -9,7 +10,7 @@
 	async function handleLogin() {
 		errorMessage = ''; // Hata mesajını temizle
 		try {
-			const response = await fetch('https://8080-firebase-go-odeme-bildirimi-1759869459857.cluster-yy7ncoxb5zd4ouvntrhoc3go3k.cloudworkstations.dev/auth/login', {
+			const response = await fetch(`${API_BASE_URL}/auth/login`, {
 				method: 'POST',
 				headers: {
 					'Content-Type': 'application/json'
@@ -53,6 +54,10 @@
 
 		<button type="submit">Giriş Yap</button>
 	</form>
+
+	<div class="register-link">
+        <p>Hesabınız yok mu? <a href="/register">Hemen Kayıt Olun</a></p>
+    </div>
 </div>
 
 <style>
@@ -74,5 +79,18 @@
 .form-group {
     margin-bottom: 1.5rem;
 }
-/* ... */
+
+.register-link {
+    text-align: center;
+    margin-top: 1.5rem;
+    color: #606770;
+}
+.register-link a {
+    color: #1877f2;
+    font-weight: 500;
+    text-decoration: none;
+}
+.register-link a:hover {
+    text-decoration: underline;
+}
 </style>
