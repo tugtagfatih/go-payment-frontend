@@ -1,0 +1,1 @@
+export const API_BASE_URL = 'https://8080-firebase-go-odeme-bildirimi-1759869459857.cluster-yy7ncoxb5zd4ouvntrhoc3go3k.cloudworkstations.dev';
