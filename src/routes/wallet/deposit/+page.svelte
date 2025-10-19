@@ -85,8 +85,8 @@
 				throw new Error(errorData.error || 'Bildirim oluşturulamadı.');
 			}
 
-			successMessage = 'Ödeme bildiriminiz alındı.
-Admin onayı sonrası bakiyenize yansıyacaktır.';
+			successMessage = `Ödeme bildiriminiz alındı.
+Admin onayı sonrası bakiyenize yansıyacaktır.`;
 			amount = null;
 			notes = '';
 			senderName = '';

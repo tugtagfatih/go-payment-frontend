@@ -6,7 +6,7 @@
 
 	// Banka listesi (veritabanına eklemeye gerek yok, frontend'de tutabiliriz)
 	const withdrawalBankNames = [
-        'T.C.
+        `T.C.
 Ziraat Bankası A.Ş.', 'Türkiye Halk Bankası A.Ş.', 'Türkiye Vakıflar Bankası T.A.O.',
         'Türkiye İş Bankası A.Ş.', 'Akbank T.A.Ş.', 'Yapı ve Kredi Bankası A.Ş.',
         'Türkiye Garanti Bankası A.Ş.', 'QNB Finansbank A.Ş.', 'Denizbank A.Ş.',
@@ -20,7 +20,7 @@ Ziraat Bankası A.Ş.', 'Türkiye Halk Bankası A.Ş.', 'Türkiye Vakıflar Bank
         'Hayat Finans Katılım Bankası A.Ş.', 'Dünya Katılım Bankası A.Ş.', 'Aktif Yatırım Bankası A.Ş.',
         'Türkiye Sınai Kalkınma Bankası A.Ş.', 'Türkiye Kalkınma ve Yatırım 
 Bankası A.Ş.',
-        'İller Bankası A.Ş.', 'Türk Eximbank', 'Pasha Yatırım Bankası A.Ş.', 'GSD Yatırım Bankası A.Ş.'
+        'İller Bankası A.Ş.', 'Türk Eximbank', 'Pasha Yatırım Bankası A.Ş.', 'GSD Yatırım Bankası A.Ş.`
 	].sort(); // Alfabetik sıralama
 
 	// Banka Bilgileri Formu için değişkenler

@@ -6,14 +6,19 @@ import type { LayoutLoad } from './$types';
 const ADMIN_ROLES = ['approver', 'admin', 'master_admin'];
 
 export const load: LayoutLoad = async () => {
-    const { isAuthenticated, role } = get(authStore);
+    const authState = get(authStore); // Tüm state'i al
+    const { isAuthenticated, role } = authState;
 
-    // Eğer kullanıcı giriş yapmamışsa veya rolü yetkili rollerden biri değilse,
-    // ana sayfaya yönlendir ve işlemi durdur.
+    // --- DEBUG KODU ---
+    console.log('Admin Layout Kontrolü:', { isAuthenticated, role });
+    // --- DEBUG KODU SONU ---
+
     if (!isAuthenticated || !role || !ADMIN_ROLES.includes(role)) {
-        throw redirect(307, '/'); // 307: Geçici Yönlendirme
+        console.error('!!! YÖNLENDİRME BLOKUNA GİRİLDİ !!!', { isAuthenticated, role });
+	console.log('Admin layout\'tan yönlendiriliyor...'); // Yönlendirme logu
+        throw redirect(307, '/');
     }
 
-    // Eğer yetkiliyse, sayfanın yüklenmesine izin ver.
+    // Yetkiliyse, sayfanın yüklenmesine izin ver.
     return {};
 };

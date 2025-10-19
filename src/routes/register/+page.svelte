@@ -27,8 +27,8 @@
 				throw new Error(errorData.error || 'Kayıt işlemi başarısız oldu.');
 			}
 
-			successMessage = 'Kayıt başarılı!
-Giriş sayfasına yönlendiriliyorsunuz...';
+			successMessage = `Kayıt başarılı!
+Giriş sayfasına yönlendiriliyorsunuz...`;
 
 			setTimeout(() => {
 				goto('/login');
