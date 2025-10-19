@@ -4,7 +4,8 @@
 	import { authStore } from '$lib/authStore';
 	import { apiFetch } from '$lib/api';
 	import { get } from 'svelte/store';
-	import { API_BASE_URL } from '$lib/constants'; // API_BASE_URL import edildi
+	import { API_BASE_URL } from '$lib/constants';
+	// API_BASE_URL import edildi
 
 	// Gerekli tipleri tanımlayalım
 	interface ActiveBank {
@@ -18,7 +19,8 @@
 	let selectedBank: ActiveBank | null = null;
 	let amount: number | null = null;
 	let senderName: string = ''; // Yeni alan: Ad Soyad
-	let notes: string = ''; // Boş string olabilir
+	let notes: string = '';
+	// Boş string olabilir
 	let isLoading = false;
 	let isLoadingBanks = true; // Bankaları yükleme durumu
 	let errorMessage = '';
@@ -47,12 +49,12 @@
 			isLoadingBanks = false;
 		}
 	});
-
 	function handleBankSelection(event: Event) {
 		const target = event.target as HTMLSelectElement;
 		const bankId = target.value;
 		selectedBank = activeBanks.find((b) => b.id === bankId) || null;
-		errorMessage = ''; // Banka değiştiğinde hatayı temizle
+		errorMessage = '';
+		// Banka değiştiğinde hatayı temizle
 	}
 
 	async function handleSubmitNotification() {
@@ -68,7 +70,6 @@
 		isLoading = true;
 		errorMessage = '';
 		successMessage = '';
-
 		try {
 			const response = await apiFetch('/api/wallet/notifications', {
 				method: 'POST',
@@ -79,13 +80,13 @@
 					sender_name: senderName.trim()
 				})
 			});
-
 			if (!response.ok) {
 				const errorData = await response.json();
 				throw new Error(errorData.error || 'Bildirim oluşturulamadı.');
 			}
 
-			successMessage = 'Ödeme bildiriminiz alındı. Admin onayı sonrası bakiyenize yansıyacaktır.';
+			successMessage = 'Ödeme bildiriminiz alındı.
+Admin onayı sonrası bakiyenize yansıyacaktır.';
 			amount = null;
 			notes = '';
 			senderName = '';
@@ -111,7 +112,7 @@
 			<h2 class="text-3xl font-extrabold text-gray-900 dark:text-white">Para Yükle</h2>
 			<p class="mt-2 text-sm text-gray-600 dark:text-gray-400">
 				Banka havalesi/EFT ile yaptığınız ödemeyi bildirin.
-			</p>
+</p>
 		</div>
 
 		<form
@@ -127,7 +128,7 @@
 			{:else if activeBanks.length === 0}
 				<p class="warning text-center p-4 bg-warning/10 rounded-md">
 					Şu anda para yatırabileceğiniz aktif bir banka hesabı bulunmamaktadır.
-				</p>
+</p>
 			{:else}
 				<div class="rounded-md shadow-sm -space-y-px flex flex-col gap-4">
 					<div>
@@ -158,7 +159,8 @@
 							</p>
 							<p class="text-sm">
 								<strong>Alıcı Adı:</strong>
-								{selectedBank.account_holder_name ?? 'Belirtilmemiş'}
+								{selectedBank.account_holder_name ??
+'Belirtilmemiş'}
 							</p>
 							<p class="text-sm flex items-center gap-2">
 								<strong>IBAN:</strong>
@@ -215,13 +217,13 @@
 								rows="3"
 								bind:value={notes}
 								placeholder="Örn: Sipariş no, ek bilgi vb."
-								class="appearance-none rounded-lg relative block w-full px-3 py-3 border border-gray-300 dark:border-gray-700 placeholder-gray-500 text-gray-900 dark:text-white bg-background-light dark:bg-background-dark focus:outline-none focus:ring-primary focus:border-primary sm:text-sm resize-vertical"
+class="appearance-none rounded-lg relative block w-full px-3 py-3 border border-gray-300 dark:border-gray-700 placeholder-gray-500 text-gray-900 dark:text-white bg-background-light dark:bg-background-dark focus:outline-none focus:ring-primary focus:border-primary sm:text-sm resize-vertical"
 							/>
 						</div>
 					{:else}
 						<p class="text-center text-sm text-subtle-light dark:text-subtle-dark py-4">
 							Lütfen yukarıdan bir banka seçerek devam edin.
-						</p>
+</p>
 					{/if}
 				</div>
 
@@ -236,7 +238,8 @@
 					<div>
 						<button
 							type="submit"
-							disabled={isLoading || !selectedBank}
+							disabled={isLoading ||
+!selectedBank}
 							class="group relative w-full flex justify-center py-3 px-4 border border-transparent text-sm font-medium rounded-lg text-white bg-primary hover:bg-primary/90 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary disabled:opacity-50 disabled:cursor-not-allowed"
 						>
 							{#if isLoading}
@@ -255,7 +258,8 @@
 <style>
 	/* Tailwind sınıfları kullanıldığı için stil bloğu genellikle boş kalır */
 	.iban {
-		user-select: all; /* IBAN'ın kolayca seçilip kopyalanmasını sağlar */
+		user-select: all;
+/* IBAN'ın kolayca seçilip kopyalanmasını sağlar */
 	}
 	/* Responsive tasarım için Tailwind sınıfları yeterli olmalı */
 </style>

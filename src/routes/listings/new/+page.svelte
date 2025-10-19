@@ -4,7 +4,6 @@
 	import { authStore } from '$lib/authStore';
 	import { apiFetch } from '$lib/api';
 	import { get } from 'svelte/store';
-
 	// Giriş yapmamış kullanıcıları login sayfasına yönlendir
 	onMount(() => {
 		if (!get(authStore).isAuthenticated) {
@@ -17,7 +16,8 @@
 	let price: number | null = null;
 	let errorMessage = '';
 	let successMessage = '';
-    let isLoading = false; // Yükleme durumu
+    let isLoading = false;
+	// Yükleme durumu
 
 	async function handleCreateListing() {
         isLoading = true;
@@ -33,7 +33,6 @@
 					price: price
 				})
 			});
-
 			if (!response.ok) {
 				const errorData = await response.json();
 				throw new Error(errorData.error || 'İlan oluşturulamadı.');
@@ -43,7 +42,6 @@
 			itemName = '';
 			description = '';
 			price = null;
-
 			setTimeout(() => {
 				goto('/');
 			}, 2000);
@@ -52,7 +50,7 @@
 			errorMessage = error.message;
 		} finally {
             isLoading = false;
-        }
+		}
 	}
 </script>
 
@@ -83,7 +81,8 @@
 						id="description"
 						rows="4"
 						class="appearance-none rounded-lg relative block w-full px-3 py-3 border border-gray-300 dark:border-gray-700 placeholder-gray-500 text-gray-900 dark:text-white bg-background-light dark:bg-background-dark focus:outline-none focus:ring-primary focus:border-primary sm:text-sm"
-						placeholder="Ürünün durumu, özellikleri vb. hakkında bilgi verin"
+						placeholder="Ürünün durumu, özellikleri vb.
+hakkında bilgi verin"
                     ></textarea>
 				</div>
                 <div>
@@ -110,10 +109,12 @@
 			<div>
 				<button
 					type="submit"
-					class="group relative w-full flex justify-center py-3 px-4 border border-transparent text-sm font-medium rounded-lg text-white bg-primary hover:bg-primary/90 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary disabled:opacity-50"
+					class="group relative w-full 
+flex justify-center py-3 px-4 border border-transparent text-sm font-medium rounded-lg text-white bg-primary hover:bg-primary/90 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary disabled:opacity-50"
 					disabled={isLoading}
 				>
-					{isLoading ? 'Yayınlanıyor...' : 'İlanı Yayınla'}
+					{isLoading ?
+'Yayınlanıyor...' : 'İlanı Yayınla'}
 				</button>
 			</div>
 		</form>

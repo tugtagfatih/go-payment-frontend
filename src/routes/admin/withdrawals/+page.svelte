@@ -2,14 +2,15 @@
 	import type { PageData } from './$types';
 	import { apiFetch } from '$lib/api';
 	import { invalidateAll } from '$app/navigation';
-
 	export let data: PageData;
 	// Use a string to track loading state for specific actions
-	let loadingAction: string | null = null;
+	let loadingAction: string |
+null = null;
 	let errorMessage = ''; // Add error message state
 
 	async function handleAction(requestId: string, action: 'approve' | 'reject') {
-		loadingAction = `${action}-${requestId}`; // Track which specific action is loading
+		loadingAction = `${action}-${requestId}`;
+		// Track which specific action is loading
 		errorMessage = ''; // Clear previous errors
 		try {
 			const response = await apiFetch(`/admin/withdrawals/${requestId}/${action}`, {
@@ -18,11 +19,13 @@
 			if (!response.ok) {
 				const errorData = await response.json();
 				// Display error more gracefully instead of alert
-				errorMessage = `İşlem başarısız: ${errorData.error || 'Bilinmeyen Hata'}`;
+				errorMessage = `İşlem başarısız: ${errorData.error ||
+'Bilinmeyen Hata'}`;
 				// Don't invalidate if there was an error, let the user see the message
 				return;
 			}
-			await invalidateAll(); // Refresh data on success
+			await invalidateAll();
+			// Refresh data on success
 		} catch (error: any) {
 			errorMessage = `Bir hata oluştu: ${error.message || 'Sunucu hatası'}`;
 		} finally {
@@ -89,17 +92,20 @@
 				</tr>
 			</thead>
 			<tbody class="divide-y divide-gray-200 dark:divide-gray-700">
-				{#each data.requests as req (req.id)}
+				{#each data.requests 
+as req (req.id)}
 					<tr class="hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors">
 						<td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-text-light dark:text-text-dark"
 						>
-							{req.username ?? '-'}
+							{req.username ??
+'-'}
 						</td>
 						<td class="px-6 py-4 whitespace-nowrap text-sm text-subtle-light dark:text-subtle-dark">
 							{req.withdrawal_bank_name ?? '-'}
 						</td>
 						<td class="px-6 py-4 whitespace-nowrap text-sm text-subtle-light dark:text-subtle-dark">
-							{req.target_iban ?? '-'}
+							{req.target_iban ??
+'-'}
 						</td>
 						<td class="px-6 py-4 whitespace-nowrap text-sm text-text-light dark:text-text-dark">
 							{req.amount.toFixed(2)} TL
@@ -113,14 +119,16 @@
 								disabled={!!loadingAction}
 								class="px-3 py-1 text-xs font-semibold rounded-md text-white bg-success hover:bg-success/90 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-success disabled:opacity-50 disabled:cursor-not-allowed"
 							>
-								{loadingAction === `approve-${req.id}` ? '...' : 'Onayla'}
+								{loadingAction === `approve-${req.id}` ?
+'...' : 'Onayla'}
 							</button>
 							<button
 								on:click={() => handleAction(req.id, 'reject')}
 								disabled={!!loadingAction}
 								class="px-3 py-1 text-xs font-semibold rounded-md text-white bg-danger hover:bg-danger/90 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-danger disabled:opacity-50 disabled:cursor-not-allowed"
 							>
-								{loadingAction === `reject-${req.id}` ? '...' : 'Reddet'}
+								{loadingAction === `reject-${req.id}` ?
+'...' : 'Reddet'}
 							</button>
 						</td>
 					</tr>
@@ -135,6 +143,7 @@
 {/if}
 
 <style>
-	/* Tailwind sınıfları kullanıldığı için buraya ek stil yazmaya genellikle gerek yoktur. */
+	/* Tailwind sınıfları kullanıldığı için buraya ek stil yazmaya genellikle gerek yoktur.
+*/
 	/* Özel durumlar için gerekirse buraya eklenebilir. */
 </style>

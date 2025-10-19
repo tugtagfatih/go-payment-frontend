@@ -1,7 +1,6 @@
 <script lang="ts">
 	import type { PageData } from './$types';
 	export let data: PageData;
-
 	// İşlem tiplerini daha okunaklı hale getirmek için bir yardımcı fonksiyon
 	function formatTransactionType(type: string): string {
 		const types: { [key: string]: string } = {
@@ -55,7 +54,8 @@
 							<div class="flex items-center gap-4">
 								{#if tx.amount > 0}
 									<div
-										class="bg-success/10 text-success size-10 rounded-full flex items-center justify-center shrink-0"
+										class="bg-success/10 text-success 
+size-10 rounded-full flex items-center justify-center shrink-0"
 									>
 										<span class="material-symbols-outlined">south_west</span>
 									</div>
@@ -86,14 +86,16 @@
 									class:text-danger={tx.amount < 0 && tx.type !== 'withdrawal'}
 									class:text-warning={tx.type === 'withdrawal'}
 								>
-									{tx.amount > 0 ? '+' : ''}{tx.amount.toFixed(2)} ₺
+									{tx.amount > 0 ?
+'+' : ''}{tx.amount.toFixed(2)} ₺
 								</p>
 							</div>
 							{#if ['pending', 'rejected', 'completed', 'approved'].includes(tx.status)}
 								<div class="absolute bottom-0 left-0 right-0 h-1">
 									<div
 										class="h-full rounded-b-lg"
-										class:bg-success={tx.status === 'completed' || tx.status === 'approved'}
+										class:bg-success={tx.status === 'completed' ||
+tx.status === 'approved'}
 										class:bg-danger={tx.status === 'rejected'}
 										class:bg-warning={tx.status === 'pending'}
 										style="width: 100%;"
@@ -105,7 +107,7 @@
 				{:else}
 					<p class="text-subtle-light dark:text-subtle-dark text-center py-4">
 						Henüz bir işlem geçmişiniz bulunmuyor.
-					</p>
+</p>
 				{/if}
 			</div>
 		{:else if data.error}

@@ -2,27 +2,28 @@
 	import type { PageData } from './$types';
 	import { apiFetch } from '$lib/api';
 	import { invalidateAll } from '$app/navigation';
-
 	export let data: PageData;
 	let searchTerm = data.searchQuery || '';
-    let loadingAction: string | null = null; // Ban/Unban butonu için
+    let loadingAction: string | null = null;
+	// Ban/Unban butonu için
 
 	async function handleAction(userId: string, action: 'ban' | 'unban') {
 		const confirmMessage = action === 'ban'
-			? 'Bu kullanıcıyı banlamak istediğinizden emin misiniz?'
+			?
+'Bu kullanıcıyı banlamak istediğinizden emin misiniz?'
 			: 'Bu kullanıcının banını kaldırmak istediğinizden emin misiniz?';
-
 		if (confirm(confirmMessage)) {
             loadingAction = `${action}-${userId}`;
 			try {
-                await apiFetch(`/admin/users/${userId}/${action}`, { method: 'POST' }); //
+                await apiFetch(`/admin/users/${userId}/${action}`, { method: 'POST' });
+			//
 			    invalidateAll(); //
             } catch (error) {
                 console.error(`Error ${action}ning user:`, error);
-			    alert(`Kullanıcı işlemi (${action}) sırasında bir hata oluştu.`);
+				alert(`Kullanıcı işlemi (${action}) sırasında bir hata oluştu.`);
             } finally {
                 loadingAction = null;
-            }
+			}
 		}
 	}
 </script>
@@ -54,7 +55,8 @@
 </form>
 
 {#if data.users && data.users.length > 0}
-	<div class="overflow-x-auto bg-surface-light dark:bg-surface-dark rounded-lg shadow">
+	<div class="overflow-x-auto bg-surface-light dark:bg-surface-dark rounded-lg 
+shadow">
 		<table class="min-w-full divide-y divide-gray-200 dark:divide-gray-700">
 			<thead class="bg-gray-50 dark:bg-gray-700">
 				<tr>
@@ -71,28 +73,36 @@
 						<td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-text-light dark:text-text-dark">{user.username}</td>
 						<td class="px-6 py-4 whitespace-nowrap text-sm text-subtle-light dark:text-subtle-dark">{user.email}</td>
 						<td class="px-6 py-4 whitespace-nowrap text-sm text-text-light dark:text-text-dark">{user.role}</td>
-						<td class="px-6 py-4 whitespace-nowrap text-sm">
+						<td class="px-6 py-4 whitespace-nowrap 
+text-sm">
                             <span class:text-success={user.account_status === 'active'} class:text-danger={user.account_status === 'banned'}>
                                 {user.account_status}
                             </span>
-                        </td>
+      
+                  </td>
 						<td class="px-6 py-4 whitespace-nowrap text-sm font-medium space-x-2">
 							{#if user.role !== 'master_admin'}
 								{#if user.account_status === 'active'}
 									<button
                                         on:click={() => handleAction(user.id, 'ban')}
-                                        disabled={!!loadingAction}
+                           
+             disabled={!!loadingAction}
                                         class="px-3 py-1 text-xs font-semibold rounded-md text-white bg-danger hover:bg-danger/90 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-danger disabled:opacity-50 disabled:cursor-not-allowed"
-                                    >
-                                        {loadingAction === `ban-${user.id}` ? '...' : 'Banla'}
+                                  
+  >
+                                        {loadingAction === `ban-${user.id}` ?
+'...' : 'Banla'}
                                     </button>
 								{:else if user.account_status === 'banned'}
 									<button
                                         on:click={() => handleAction(user.id, 'unban')}
-                                        disabled={!!loadingAction}
+               
+                         disabled={!!loadingAction}
                                         class="px-3 py-1 text-xs font-semibold rounded-md text-white bg-warning hover:bg-warning/90 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-warning disabled:opacity-50 disabled:cursor-not-allowed"
-                                    >
-                                        {loadingAction === `unban-${user.id}` ? '...' : 'Banı Kaldır'}
+                      
+              >
+                                        {loadingAction === `unban-${user.id}` ?
+'...' : 'Banı Kaldır'}
                                     </button>
 								{/if}
 							{/if}

@@ -5,12 +5,10 @@
 	import { goto } from '$app/navigation';
 
 	export let data: PageData;
-
 	// Buton durumunu ve mesajları yönetmek için yeni değişkenler
 	let isLoading = false;
 	let errorMessage = '';
 	let successMessage = '';
-
 	async function handlePurchase() {
 		// --- 1. Kullanıcı Giriş Yapmış mı Kontrolü ---
 		// $authStore diyerek store'un anlık değerini okuyoruz.
@@ -22,7 +20,7 @@
 		if (!data.listing) {
         errorMessage = 'İlan verisi bulunamadı, sayfanızı yenileyin.';
         return;
-    	}
+		}
 
 		// --- 2. Satın Alma İşlemini Başlat ---
 		isLoading = true; // Butonu devre dışı bırakmak için
@@ -35,7 +33,6 @@
 			const response = await apiFetch(`/api/listings/${data.listing.id}/buy`, {
 				method: 'POST'
 			});
-
 			if (!response.ok) {
 				// Eğer API hata dönerse (yetersiz bakiye vb.), hatayı yakala.
 				const errorData = await response.json();
@@ -44,12 +41,10 @@
 			
 			// İşlem başarılı!
 			successMessage = 'Satın alma başarılı! Profil sayfanıza yönlendiriliyorsunuz...';
-
 			// 2 saniye sonra kullanıcıyı profil sayfasına yönlendir.
 			setTimeout(() => {
 				goto('/profile'); // Henüz bu sayfayı yapmadık ama yönlendirmeyi ekleyelim.
 			}, 2000);
-
 		} catch (error: any) {
 			errorMessage = error.message;
 		} finally {
@@ -74,7 +69,8 @@
 				<span class="price">{data.listing.price} TL</span>
 				
 				{#if $authStore.isAuthenticated}
-					<button on:click={handlePurchase} disabled={isLoading || data.listing.status !== 'active'}>
+					<button on:click={handlePurchase} disabled={isLoading ||
+data.listing.status !== 'active'}>
 						{#if isLoading}
 							İşleniyor...
 						{:else if data.listing.status !== 'active'}
@@ -106,7 +102,7 @@
 	/* ... (Mevcut stiller aynı kalabilir) ... */
 	.price-box button, .login-button {
 		padding: 0.8rem 1.5rem;
-		border: none;
+border: none;
 		background-color: #1877f2;
 		color: white;
 		border-radius: 6px;
