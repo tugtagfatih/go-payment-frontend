@@ -2,157 +2,124 @@
 	import type { PageData } from './$types';
 	export let data: PageData;
 
-    // İşlem tiplerini daha okunaklı hale getirmek için bir yardımcı fonksiyon
-    function formatTransactionType(type: string): string {
-        const types: { [key: string]: string } = {
-            'deposit': 'Para Yatırma',
-            'withdrawal': 'Para Çekme',
-            'purchase': 'Ürün Alımı',
-            'sale': 'Ürün Satışı'
-        };
-        return types[type] || type;
-    }
+	// İşlem tiplerini daha okunaklı hale getirmek için bir yardımcı fonksiyon
+	function formatTransactionType(type: string): string {
+		const types: { [key: string]: string } = {
+			deposit: 'Para Yatırma',
+			withdrawal: 'Para Çekme',
+			purchase: 'Ürün Alımı',
+			sale: 'Ürün Satışı'
+		};
+		return types[type] || type;
+	}
 </script>
 
-<main class="wallet-container">
-	<h1>Cüzdanım</h1>
+<svelte:head>
+	<title>Cüzdanım - GoPay</title>
+	<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined" rel="stylesheet" />
+</svelte:head>
 
-	{#if data.wallet}
-		<div class="balance-card">
-			<span class="label">Mevcut Bakiye</span>
-			<span class="balance">{data.wallet.balance.toFixed(2)} TL</span>
-		</div>
+<main class="flex-grow container mx-auto px-4 sm:px-6 lg:px-8 py-8">
+	<div class="max-w-4xl mx-auto">
+		{#if data.wallet}
+			<div class="bg-surface-light dark:bg-surface-dark rounded-xl shadow-sm p-6 md:p-8 mb-8">
+				<p class="text-subtle-light dark:text-subtle-dark text-sm font-medium mb-2">
+					Mevcut Bakiye
+				</p>
+				<p class="text-4xl md:text-5xl font-extrabold tracking-tight mb-6">
+					{data.wallet.balance.toFixed(2)} ₺
+				</p>
+				<div class="flex flex-col sm:flex-row gap-4">
+					<a
+						href="/wallet/deposit"
+						class="flex-1 flex items-center justify-center gap-2 bg-success hover:bg-success/90 text-white font-bold py-3 px-4 rounded-lg transition-colors"
+					>
+						<span class="material-symbols-outlined">add_circle</span>
+						<span>Para Yükle</span>
+					</a>
+					<a
+						href="/wallet/withdraw"
+						class="flex-1 flex items-center justify-center gap-2 bg-warning hover:bg-warning/90 text-white font-bold py-3 px-4 rounded-lg transition-colors"
+					>
+						<span class="material-symbols-outlined">remove_circle</span>
+						<span>Para Çek</span>
+					</a>
+				</div>
+			</div>
 
-		<div class="action-buttons">
-			<a href="/wallet/deposit" class="action-button deposit">Para Yükle</a>
-			<a href="/wallet/withdraw" class="action-button withdraw">Para Çek</a>
-		</div>
+			<h2 class="text-2xl font-bold tracking-tight mb-4">Son İşlemler</h2>
+			<div class="space-y-4">
+				{#if data.transactionHistory && data.transactionHistory.length > 0}
+					{#each data.transactionHistory as tx (tx.id)}
+						<div class="bg-surface-light dark:bg-surface-dark rounded-xl p-4 shadow-sm relative overflow-hidden">
+							<div class="flex items-center gap-4">
+								{#if tx.amount > 0}
+									<div
+										class="bg-success/10 text-success size-10 rounded-full flex items-center justify-center shrink-0"
+									>
+										<span class="material-symbols-outlined">south_west</span>
+									</div>
+								{:else if tx.type === 'withdrawal'}
+									<div
+										class="bg-warning/10 text-warning size-10 rounded-full flex items-center justify-center shrink-0"
+									>
+										<span class="material-symbols-outlined">north_east</span>
+									</div>
+								{:else}
+									<div
+										class="bg-danger/10 text-danger size-10 rounded-full flex items-center justify-center shrink-0"
+									>
+										<span class="material-symbols-outlined">north_east</span>
+									</div>
+								{/if}
 
-        <div class="history-section">
-            <h2>Son İşlemler</h2>
-            {#if data.transactionHistory && data.transactionHistory.length > 0}
-                <ul class="history-list">
-                    {#each data.transactionHistory as tx (tx.id)}
-                        <li class="history-item" class:completed={tx.status === 'completed'} class:rejected={tx.status === 'rejected'}>
-                            <div class="item-details">
-                                <span class="item-type">{formatTransactionType(tx.type)}</span>
-                                <span class="item-date">{new Date(tx.created_at).toLocaleString()}</span>
-                            </div>
-                            <div class="item-amount" class:positive={tx.amount > 0} class:negative={tx.amount < 0}>
-                                {tx.amount.toFixed(2)} TL
-                            </div>
-                        </li>
-                    {/each}
-                </ul>
-            {:else}
-                <p>Henüz bir işlem geçmişiniz bulunmuyor.</p>
-            {/if}
-        </div>
+								<div class="flex-grow">
+									<p class="font-semibold">{formatTransactionType(tx.type)}</p>
+									<p class="text-sm text-subtle-light dark:text-subtle-dark">
+										{new Date(tx.created_at).toLocaleString()}
+									</p>
+								</div>
 
-	{:else if data.error}
-		<p class="error">{data.error}</p>
-	{/if}
+								<p
+									class="font-semibold"
+									class:text-success={tx.amount > 0}
+									class:text-danger={tx.amount < 0 && tx.type !== 'withdrawal'}
+									class:text-warning={tx.type === 'withdrawal'}
+								>
+									{tx.amount > 0 ? '+' : ''}{tx.amount.toFixed(2)} ₺
+								</p>
+							</div>
+							{#if ['pending', 'rejected', 'completed', 'approved'].includes(tx.status)}
+								<div class="absolute bottom-0 left-0 right-0 h-1">
+									<div
+										class="h-full rounded-b-lg"
+										class:bg-success={tx.status === 'completed' || tx.status === 'approved'}
+										class:bg-danger={tx.status === 'rejected'}
+										class:bg-warning={tx.status === 'pending'}
+										style="width: 100%;"
+									/>
+								</div>
+							{/if}
+						</div>
+					{/each}
+				{:else}
+					<p class="text-subtle-light dark:text-subtle-dark text-center py-4">
+						Henüz bir işlem geçmişiniz bulunmuyor.
+					</p>
+				{/if}
+			</div>
+		{:else if data.error}
+			<div class="bg-danger/10 text-danger p-4 rounded-lg">
+				<p>{data.error}</p>
+			</div>
+		{:else}
+			<p class="text-subtle-light dark:text-subtle-dark text-center py-10">
+				Cüzdan bilgileri yükleniyor...
+			</p>
+		{/if}
+	</div>
 </main>
 
 <style>
-	.wallet-container {
-		max-width: 600px;
-		margin: 2rem auto;
-		padding: 1rem;
-	}
-	.balance-card {
-		background: #fff;
-		padding: 2rem;
-		border-radius: 8px;
-		box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
-		text-align: center;
-		margin-bottom: 2rem;
-	}
-	.label {
-		display: block;
-		font-size: 1rem;
-		color: #606770;
-	}
-	.balance {
-		display: block;
-		font-size: 2.5rem;
-		font-weight: bold;
-		color: #1c1e21;
-		margin-top: 0.5rem;
-	}
-	.action-buttons {
-		display: grid;
-		grid-template-columns: 1fr 1fr;
-		gap: 1rem;
-	}
-	.action-button {
-		display: block;
-		width: 100%;
-		padding: 1rem;
-		color: white;
-		text-align: center;
-		text-decoration: none;
-		font-size: 1.2rem;
-		font-weight: bold;
-		border-radius: 6px;
-		transition: background-color 0.2s;
-	}
-	.deposit {
-		background-color: #42b72a;
-	}
-	.deposit:hover {
-		background-color: #36a420;
-	}
-	.withdraw {
-		background-color: #f0ad4e;
-	}
-	.withdraw:hover {
-		background-color: #ec971f;
-	}
-
-    /* YENİ EKLENEN İŞLEM GEÇMİŞİ STİLLERİ */
-    .history-section {
-        margin-top: 3rem;
-    }
-    .history-list {
-        list-style: none;
-        padding: 0;
-    }
-    .history-item {
-        display: flex;
-        justify-content: space-between;
-        align-items: center;
-        padding: 1rem;
-        border-radius: 6px;
-        margin-bottom: 0.5rem;
-        background-color: #f0f2f5;
-    }
-    .item-details {
-        display: flex;
-        flex-direction: column;
-    }
-    .item-type {
-        font-weight: 500;
-    }
-    .item-date {
-        font-size: 0.8rem;
-        color: #606770;
-    }
-    .item-amount {
-        font-weight: bold;
-        font-size: 1.1rem;
-    }
-    /* Renklendirme */
-    .positive { color: #2e7d32; } /* Yeşil */
-    .negative { color: #c62828; } /* Kırmızı */
-
-    /* Durum Renkleri */
-    .history-item.completed {
-        border-left: 5px solid #42b72a; /* Yeşil bar */
-    }
-    .history-item.rejected {
-        border-left: 5px solid #d9534f; /* Kırmızı bar */
-        background-color: #fdeeee;
-        opacity: 0.8;
-    }
+	/* Önceki stiller Tailwind ile değiştirildiği için kaldırıldı */
 </style>
