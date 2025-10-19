@@ -2,11 +2,27 @@
 	import type { PageData } from './$types';
 	import { apiFetch } from '$lib/api';
 	import { onMount } from 'svelte';
-
 	export let data: PageData;
+
+	// Banka listesi (veritabanına eklemeye gerek yok, frontend'de tutabiliriz)
+	const withdrawalBankNames = [
+        'T.C. Ziraat Bankası A.Ş.', 'Türkiye Halk Bankası A.Ş.', 'Türkiye Vakıflar Bankası T.A.O.',
+        'Türkiye İş Bankası A.Ş.', 'Akbank T.A.Ş.', 'Yapı ve Kredi Bankası A.Ş.',
+        'Türkiye Garanti Bankası A.Ş.', 'QNB Finansbank A.Ş.', 'Denizbank A.Ş.',
+        'Türk Ekonomi Bankası A.Ş.', 'ING Bank A.Ş.', 'HSBC Bank A.Ş.', 'Odea Bank A.Ş.',
+        'Alternatifbank A.Ş.', 'Fibabanka A.Ş.', 'Şekerbank T.A.Ş.', 'Anadolubank A.Ş.',
+        'Burgan Bank A.Ş.', 'Citibank A.Ş.', 'ICBC Turkey Bank A.Ş.', 'Arap Türk Bankası A.Ş.',
+        'MUFG Bank Turkey A.Ş.', 'Turkish Bank A.Ş.', 'Turkland Bank A.Ş.', 'Bank of China Turkey A.Ş.',
+        'Albaraka Türk Katılım Bankası A.Ş.', 'Kuveyt Türk Katılım Bankası A.Ş.', 'Türkiye Finans Katılım Bankası A.Ş.',
+        'Ziraat Katılım Bankası A.Ş.', 'Vakıf Katılım Bankası A.Ş.', 'Türkiye Emlak Katılım Bankası A.Ş.',
+        'Hayat Finans Katılım Bankası A.Ş.', 'Dünya Katılım Bankası A.Ş.', 'Aktif Yatırım Bankası A.Ş.',
+        'Türkiye Sınai Kalkınma Bankası A.Ş.', 'Türkiye Kalkınma ve Yatırım Bankası A.Ş.',
+        'İller Bankası A.Ş.', 'Türk Eximbank', 'Pasha Yatırım Bankası A.Ş.', 'GSD Yatırım Bankası A.Ş.'
+    ].sort(); // Alfabetik sıralama
 
 	// Banka Bilgileri Formu için değişkenler
 	let iban: string = '';
+    let selectedWithdrawalBank: string = ''; // YENİ EKLENDİ
 	let bankInfoLoading = false;
 	let bankInfoError = '';
 	let bankInfoSuccess = '';
@@ -30,11 +46,13 @@
 		bankInfoLoading = true;
 		bankInfoError = '';
 		bankInfoSuccess = '';
-
 		try {
 			const response = await apiFetch('/api/profile/bank-info', {
 				method: 'PUT',
-				body: JSON.stringify({ iban })
+				body: JSON.stringify({
+                    iban: iban.trim() || null, // Boş ise null gönder
+                    withdrawal_bank_name: selectedWithdrawalBank || null // Boş ise null gönder
+                })
 			});
 
 			if (!response.ok) {
@@ -124,18 +142,24 @@
 
 	<section class="profile-section">
         <h2>Banka Bilgileri</h2>
-        <p>Para çekme işlemlerinde kullanılacak olan IBAN adresinizi giriniz.</p>
-        <form on:submit|preventDefault={handleUpdateBankInfo} class="form-grid">
+        <p>Para çekme işlemlerinde kullanılacak olan banka ve IBAN adresinizi giriniz.</p>
+        <form on:submit|preventDefault={handleUpdateBankInfo} class="bank-form">
+            <div class="form-group">
+                <label for="withdrawal-bank">Banka Adı</label>
+                <select id="withdrawal-bank" bind:value={selectedWithdrawalBank}>
+                    <option value="">-- Banka Seçin (İsteğe Bağlı) --</option>
+                    {#each withdrawalBankNames as bankName}
+                        <option value={bankName}>{bankName}</option>
+                    {/each}
+                </select>
+            </div>
             <div class="form-group">
                 <label for="iban">IBAN</label>
-                <input type="text" id="iban" bind:value={iban} placeholder="TR..." required />
+                <input type="text" id="iban" bind:value={iban} placeholder="TR..." />
+                <small>IBAN girmeniz para çekme talebi oluşturmak için zorunludur.</small>
             </div>
             <button type="submit" disabled={bankInfoLoading}>
-                {#if bankInfoLoading}
-                    Kaydediliyor...
-                {:else}
-                    Kaydet
-                {/if}
+                {#if bankInfoLoading} Kaydediliyor... {:else} Kaydet {/if}
             </button>
         </form>
 		{#if bankInfoError}
@@ -258,5 +282,29 @@
     }
     .password-form button {
         align-self: flex-start;
+    }
+
+	.bank-form {
+        display: flex;
+        flex-direction: column;
+        gap: 1rem;
+        max-width: 500px; /* Veya istediğiniz bir genişlik */
+    }
+    .bank-form button {
+        align-self: flex-start; /* Buton sola yaslansın */
+    }
+    .form-group small {
+        font-size: 0.8rem;
+        color: #606770;
+        margin-top: 0.25rem;
+    }
+    /* Select kutusu için stil */
+    select {
+        padding: 0.7rem;
+        border: 1px solid #ddd;
+        border-radius: 6px;
+        background-color: white; /* Arka plan rengi */
+        width: 100%; /* Tam genişlik */
+        box-sizing: border-box;
     }
 </style>

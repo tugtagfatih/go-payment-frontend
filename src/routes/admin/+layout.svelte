@@ -6,6 +6,7 @@
             <a href="/admin/withdrawals">Para Çekme Talepleri</a>
             <a href="/admin/roles">Rol Yönetimi</a>
             <a href="/admin/users">Kullanıcı Banlama</a>
+            <a href="/admin/banks">Banka Hesapları</a> </nav>
         </nav>
         <hr/>
         <a href="/" class="back-to-site">← Ana Siteye Dön</a>
