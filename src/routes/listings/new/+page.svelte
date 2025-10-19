@@ -2,14 +2,13 @@
 	import { onMount } from 'svelte';
 	import { goto } from '$app/navigation';
 	import { authStore } from '$lib/authStore';
-	import { apiFetch } from '$lib/api'; // Yeni apiFetch fonksiyonumuzu import ediyoruz
+	import { apiFetch } from '$lib/api';
 	import { get } from 'svelte/store';
 
-	// Bu sayfa sadece giriş yapmış kullanıcılar için.
-	// Sayfa yüklendiğinde (onMount) kullanıcının giriş durumunu kontrol ediyoruz.
+	// Giriş yapmamış kullanıcıları login sayfasına yönlendir
 	onMount(() => {
 		if (!get(authStore).isAuthenticated) {
-			goto('/login'); // Eğer giriş yapmamışsa, login sayfasına yönlendir.
+			goto('/login');
 		}
 	});
 
@@ -18,13 +17,14 @@
 	let price: number | null = null;
 	let errorMessage = '';
 	let successMessage = '';
+    let isLoading = false; // Yükleme durumu
 
 	async function handleCreateListing() {
+        isLoading = true;
 		errorMessage = '';
 		successMessage = '';
 
 		try {
-			// Korumalı endpoint'e istek atmak için apiFetch kullanıyoruz.
 			const response = await apiFetch('/api/listings', {
 				method: 'POST',
 				body: JSON.stringify({
@@ -36,62 +36,86 @@
 
 			if (!response.ok) {
 				const errorData = await response.json();
-				throw new Error(errorData.error || 'Listing could not be created.');
+				throw new Error(errorData.error || 'İlan oluşturulamadı.');
 			}
-			
+
 			successMessage = "İlan başarıyla oluşturuldu! Ana sayfaya yönlendiriliyorsunuz...";
-			
-			// Formu temizle
 			itemName = '';
 			description = '';
 			price = null;
-			
-			// 2 saniye sonra ana sayfaya yönlendir.
+
 			setTimeout(() => {
 				goto('/');
 			}, 2000);
 
 		} catch (error: any) {
 			errorMessage = error.message;
-		}
+		} finally {
+            isLoading = false;
+        }
 	}
 </script>
 
-<div class="form-container">
-	<form class="form" on:submit|preventDefault={handleCreateListing}>
-		<h2>Yeni İlan Oluştur</h2>
-		
-		<div class="form-group">
-			<label for="itemName">İlan Başlığı</label>
-			<input type="text" id="itemName" bind:value={itemName} required />
-		</div>
-		
-		<div class="form-group">
-			<label for="description">Açıklama</label>
-			<textarea id="description" rows="4" bind:value={description}></textarea>
+<div class="flex flex-col items-center justify-center min-h-screen px-4 py-8">
+	<div class="w-full max-w-lg p-8 space-y-8 bg-white dark:bg-surface-dark rounded-xl shadow-lg">
+		<div class="text-center">
+			<h2 class="text-2xl font-bold text-gray-800 dark:text-white">Yeni İlan Oluştur</h2>
+			<p class="text-gray-600 dark:text-gray-400 mt-2">Satmak istediğiniz ürünün bilgilerini girin</p>
 		</div>
 
-		<div class="form-group">
-			<label for="price">Fiyat (TL)</label>
-			<input type="number" step="0.01" id="price" bind:value={price} required />
-		</div>
+		<form on:submit|preventDefault={handleCreateListing} class="mt-8 space-y-6">
+			<div class="rounded-lg space-y-4">
+				<div>
+					<label for="itemName" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">İlan Başlığı</label>
+					<input
+						bind:value={itemName}
+						type="text"
+						required
+						class="appearance-none rounded-lg relative block w-full px-3 py-3 border border-gray-300 dark:border-gray-700 placeholder-gray-500 text-gray-900 dark:text-white bg-background-light dark:bg-background-dark focus:outline-none focus:ring-primary focus:border-primary sm:text-sm"
+						id="itemName"
+						placeholder="Örn: Vintage Deri Ceket"
+					/>
+				</div>
+				<div>
+					<label for="description" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Açıklama</label>
+					<textarea
+						bind:value={description}
+						id="description"
+						rows="4"
+						class="appearance-none rounded-lg relative block w-full px-3 py-3 border border-gray-300 dark:border-gray-700 placeholder-gray-500 text-gray-900 dark:text-white bg-background-light dark:bg-background-dark focus:outline-none focus:ring-primary focus:border-primary sm:text-sm"
+						placeholder="Ürünün durumu, özellikleri vb. hakkında bilgi verin"
+                    ></textarea>
+				</div>
+                <div>
+					<label for="price" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Fiyat (TL)</label>
+					<input
+						bind:value={price}
+						type="number"
+                        step="0.01"
+						required
+						class="appearance-none rounded-lg relative block w-full px-3 py-3 border border-gray-300 dark:border-gray-700 placeholder-gray-500 text-gray-900 dark:text-white bg-background-light dark:bg-background-dark focus:outline-none focus:ring-primary focus:border-primary sm:text-sm"
+						id="price"
+						placeholder="Örn: 450.00"
+					/>
+				</div>
+			</div>
 
-		{#if errorMessage}
-			<p class="error">{errorMessage}</p>
-		{/if}
+			{#if errorMessage}
+				<p class="text-sm text-red-600 dark:text-red-400">{errorMessage}</p>
+			{/if}
+			{#if successMessage}
+				<p class="text-sm text-green-600 dark:text-green-400">{successMessage}</p>
+			{/if}
 
-		{#if successMessage}
-			<p class="success">{successMessage}</p>
-		{/if}
-
-		<button type="submit">İlanı Yayınla</button>
-	</form>
+			<div>
+				<button
+					type="submit"
+					class="group relative w-full flex justify-center py-3 px-4 border border-transparent text-sm font-medium rounded-lg text-white bg-primary hover:bg-primary/90 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary disabled:opacity-50"
+					disabled={isLoading}
+				>
+					{isLoading ? 'Yayınlanıyor...' : 'İlanı Yayınla'}
+				</button>
+			</div>
+		</form>
+	</div>
 </div>
-
-<style>
-	.form-container { display: flex; justify-content: center; padding-top: 3rem; }
-	.form { width: 100%; max-width: 500px; padding: 2rem; background: #fff; box-shadow: 0 4px 12px rgba(0,0,0,0.1); border-radius: 8px; }
-	/* ... Diğer stil kodları ... */
-	.error { color: red; }
-	.success { color: green; }
-</style>
