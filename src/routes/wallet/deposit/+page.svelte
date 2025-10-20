@@ -5,7 +5,6 @@
 	import { apiFetch } from '$lib/api';
 	import { get } from 'svelte/store';
 	import { API_BASE_URL } from '$lib/constants';
-	// API_BASE_URL import edildi
 
 	// Gerekli tipleri tanımlayalım
 	interface ActiveBank {
@@ -16,46 +15,39 @@
 	}
 
 	let activeBanks: ActiveBank[] = [];
-	let selectedBank: ActiveBank | null = null;
+	let selectedBankId: string | null = null; // Radyo butonu seçimi için ID tutacak
 	let amount: number | null = null;
-	let senderName: string = ''; // Yeni alan: Ad Soyad
+	let senderName: string = '';
 	let notes: string = '';
-	// Boş string olabilir
 	let isLoading = false;
-	let isLoadingBanks = true; // Bankaları yükleme durumu
+	let isLoadingBanks = true;
 	let errorMessage = '';
 	let successMessage = '';
-	let bankLoadError = ''; // Banka yükleme hatası
+	let bankLoadError = '';
+
+	// Svelte'in reaktif gücü: selectedBankId değiştiğinde, selectedBank otomatik olarak güncellenir.
+	$: selectedBank = selectedBankId ? activeBanks.find((b) => b.id === selectedBankId) : null;
 
 	onMount(async () => {
 		if (!get(authStore).isAuthenticated) {
 			goto('/login');
-			return; // Giriş yapmamışsa bankaları yüklemeye çalışma
+			return;
 		}
 
-		// Aktif bankaları yükle
 		try {
-			// Public endpoint'e istek atılıyor
 			const response = await fetch(`${API_BASE_URL}/deposit-banks`);
 			if (!response.ok) {
 				throw new Error('Aktif banka bilgileri alınamadı.');
 			}
-			activeBanks = await response.json();
-			// IBAN'ı olmayan veya null olan bankaları filtrele
-			activeBanks = activeBanks.filter((bank) => bank.iban && bank.iban.trim() !== '');
+			let banks: ActiveBank[] = await response.json();
+			// Sadece IBAN'ı olan bankaları göster
+			activeBanks = banks.filter((bank) => bank.iban && bank.iban.trim() !== '');
 		} catch (error: any) {
 			bankLoadError = error.message;
 		} finally {
 			isLoadingBanks = false;
 		}
 	});
-	function handleBankSelection(event: Event) {
-		const target = event.target as HTMLSelectElement;
-		const bankId = target.value;
-		selectedBank = activeBanks.find((b) => b.id === bankId) || null;
-		errorMessage = '';
-		// Banka değiştiğinde hatayı temizle
-	}
 
 	async function handleSubmitNotification() {
 		if (!selectedBank) {
@@ -75,7 +67,7 @@
 				method: 'POST',
 				body: JSON.stringify({
 					amount,
-					notes: notes || null, // Boş ise null gönder
+					notes: notes || null,
 					deposit_bank_id: selectedBank.id,
 					sender_name: senderName.trim()
 				})
@@ -85,15 +77,12 @@
 				throw new Error(errorData.error || 'Bildirim oluşturulamadı.');
 			}
 
-			successMessage = `Ödeme bildiriminiz alındı.
-Admin onayı sonrası bakiyenize yansıyacaktır.`;
+			successMessage = `Ödeme bildiriminiz alındı. Admin onayı sonrası bakiyenize yansıyacaktır.`;
+			// Formu sıfırla
 			amount = null;
 			notes = '';
 			senderName = '';
-			selectedBank = null;
-			// Selectbox'ı sıfırla
-			const selectElement = document.getElementById('bank-select') as HTMLSelectElement;
-			if (selectElement) selectElement.value = '';
+			selectedBankId = null; // Sadece ID'yi sıfırlamak yeterli
 		} catch (error: any) {
 			errorMessage = error.message;
 		} finally {
@@ -112,7 +101,7 @@ Admin onayı sonrası bakiyenize yansıyacaktır.`;
 			<h2 class="text-3xl font-extrabold text-gray-900 dark:text-white">Para Yükle</h2>
 			<p class="mt-2 text-sm text-gray-600 dark:text-gray-400">
 				Banka havalesi/EFT ile yaptığınız ödemeyi bildirin.
-</p>
+			</p>
 		</div>
 
 		<form
@@ -128,26 +117,36 @@ Admin onayı sonrası bakiyenize yansıyacaktır.`;
 			{:else if activeBanks.length === 0}
 				<p class="warning text-center p-4 bg-warning/10 rounded-md">
 					Şu anda para yatırabileceğiniz aktif bir banka hesabı bulunmamaktadır.
-</p>
+				</p>
 			{:else}
-				<div class="rounded-md shadow-sm -space-y-px flex flex-col gap-4">
+				<div class="flex flex-col gap-4">
+					<!-- Banka Seçim Alanı (Radyo Butonları ile Düzeltildi) -->
 					<div>
-						<label for="bank-select" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1"
-							>Hangi Bankaya Para Yatırdınız?</label
-						>
-						<select
-							id="bank-select"
-							on:change={handleBankSelection}
-							required
-							class="appearance-none rounded-lg relative block w-full px-3 py-3 border border-gray-300 dark:border-gray-700 placeholder-gray-500 text-gray-900 dark:text-white bg-background-light dark:bg-background-dark focus:outline-none focus:ring-primary focus:border-primary sm:text-sm"
-						>
-							<option value="" disabled selected={!selectedBank}>-- Banka Seçin --</option>
+						<label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+							Hangi Bankaya Para Yatırdınız?
+						</label>
+						<!-- Dikey sıralama için flex-col ve aralık için gap-3 -->
+						<div class="flex flex-col gap-3">
 							{#each activeBanks as bank (bank.id)}
-								<option value={bank.id}>{bank.bank_name}</option>
+								<label
+									class="flex items-center p-3 w-full border border-gray-300 dark:border-gray-600 rounded-lg cursor-pointer hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors"
+								>
+									<input
+										type="radio"
+										name="deposit_bank_id"
+										value={bank.id}
+										bind:group={selectedBankId}
+										class="h-4 w-4 text-primary focus:ring-primary border-gray-300"
+									/>
+									<span class="ml-3 text-sm font-medium text-gray-900 dark:text-gray-300">
+										{bank.bank_name}
+									</span>
+								</label>
 							{/each}
-						</select>
+						</div>
 					</div>
 
+					<!-- Seçilen Bankanın IBAN Bilgisi -->
 					{#if selectedBank}
 						<div class="iban-info bg-primary/5 dark:bg-primary/10 p-4 rounded-lg border border-primary/20">
 							<p class="text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
@@ -159,14 +158,13 @@ Admin onayı sonrası bakiyenize yansıyacaktır.`;
 							</p>
 							<p class="text-sm">
 								<strong>Alıcı Adı:</strong>
-								{selectedBank.account_holder_name ??
-'Belirtilmemiş'}
+								{selectedBank.account_holder_name ?? 'Belirtilmemiş'}
 							</p>
 							<p class="text-sm flex items-center gap-2">
 								<strong>IBAN:</strong>
-								<span class="iban font-mono bg-gray-200 dark:bg-gray-700 px-1 rounded"
-									>{selectedBank.iban}</span
-								>
+								<span class="iban font-mono bg-gray-200 dark:bg-gray-700 px-1 rounded">
+									{selectedBank.iban}
+								</span>
 								<button
 									type="button"
 									on:click={() => navigator.clipboard.writeText(selectedBank?.iban ?? '')}
@@ -178,10 +176,11 @@ Admin onayı sonrası bakiyenize yansıyacaktır.`;
 							</p>
 						</div>
 
+						<!-- Diğer Form Alanları -->
 						<div>
-							<label for="senderName" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1"
-								>Adınız Soyadınız (Dekonttaki Gibi)</label
-							>
+							<label for="senderName" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+								Adınız Soyadınız (Dekonttaki Gibi)
+							</label>
 							<input
 								type="text"
 								id="senderName"
@@ -191,11 +190,10 @@ Admin onayı sonrası bakiyenize yansıyacaktır.`;
 								class="appearance-none rounded-lg relative block w-full px-3 py-3 border border-gray-300 dark:border-gray-700 placeholder-gray-500 text-gray-900 dark:text-white bg-background-light dark:bg-background-dark focus:outline-none focus:ring-primary focus:border-primary sm:text-sm"
 							/>
 						</div>
-
 						<div>
-							<label for="amount" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1"
-								>Yatırdığınız Tutar (TL)</label
-							>
+							<label for="amount" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+								Yatırdığınız Tutar (TL)
+							</label>
 							<input
 								type="number"
 								step="0.01"
@@ -207,23 +205,22 @@ Admin onayı sonrası bakiyenize yansıyacaktır.`;
 								class="appearance-none rounded-lg relative block w-full px-3 py-3 border border-gray-300 dark:border-gray-700 placeholder-gray-500 text-gray-900 dark:text-white bg-background-light dark:bg-background-dark focus:outline-none focus:ring-primary focus:border-primary sm:text-sm"
 							/>
 						</div>
-
 						<div>
-							<label for="notes" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1"
-								>Açıklama (İsteğe Bağlı)</label
-							>
+							<label for="notes" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+								Açıklama (İsteğe Bağlı)
+							</label>
 							<textarea
 								id="notes"
 								rows="3"
 								bind:value={notes}
 								placeholder="Örn: Sipariş no, ek bilgi vb."
-class="appearance-none rounded-lg relative block w-full px-3 py-3 border border-gray-300 dark:border-gray-700 placeholder-gray-500 text-gray-900 dark:text-white bg-background-light dark:bg-background-dark focus:outline-none focus:ring-primary focus:border-primary sm:text-sm resize-vertical"
+								class="appearance-none rounded-lg relative block w-full px-3 py-3 border border-gray-300 dark:border-gray-700 placeholder-gray-500 text-gray-900 dark:text-white bg-background-light dark:bg-background-dark focus:outline-none focus:ring-primary focus:border-primary sm:text-sm resize-vertical"
 							/>
 						</div>
 					{:else}
 						<p class="text-center text-sm text-subtle-light dark:text-subtle-dark py-4">
 							Lütfen yukarıdan bir banka seçerek devam edin.
-</p>
+						</p>
 					{/if}
 				</div>
 
@@ -238,8 +235,7 @@ class="appearance-none rounded-lg relative block w-full px-3 py-3 border border-
 					<div>
 						<button
 							type="submit"
-							disabled={isLoading ||
-!selectedBank}
+							disabled={isLoading}
 							class="group relative w-full flex justify-center py-3 px-4 border border-transparent text-sm font-medium rounded-lg text-white bg-primary hover:bg-primary/90 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary disabled:opacity-50 disabled:cursor-not-allowed"
 						>
 							{#if isLoading}
@@ -256,10 +252,8 @@ class="appearance-none rounded-lg relative block w-full px-3 py-3 border border-
 </main>
 
 <style>
-	/* Tailwind sınıfları kullanıldığı için stil bloğu genellikle boş kalır */
 	.iban {
-		user-select: all;
-/* IBAN'ın kolayca seçilip kopyalanmasını sağlar */
+		user-select: all; /* IBAN'ın kolayca seçilip kopyalanmasını sağlar */
 	}
-	/* Responsive tasarım için Tailwind sınıfları yeterli olmalı */
+	/* Tailwind sınıfları kullanıldığı için başka özel stile gerek yok */
 </style>
