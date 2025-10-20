@@ -1,21 +1,29 @@
+<script lang="ts">
+	// AuthStore'u import ediyoruz
+	import { authStore } from '$lib/authStore';
+</script>
+
 <div class="admin-layout">
 	<aside class="admin-sidebar">
 		<div>
 			<h2>Admin Paneli</h2>
 			<nav>
-				<a href="/admin/notifications">Ödeme Bildirimleri</a>
-				<a href="/admin/withdrawals">Para Çekme Talepleri</a>
-				<a href="/admin/roles">Rol Yönetimi</a>
-				<a href="/admin/users">Kullanıcı Banlama</a>
-				<a href="/admin/banks">Banka Hesapları</a>
-			
-			
+				{#if $authStore.role === 'approver' || $authStore.role === 'admin' || $authStore.role === 'master_admin'}
+					<a href="/admin/notifications">Ödeme Bildirimleri</a>
+					<a href="/admin/withdrawals">Para Çekme Talepleri</a>
+				{/if}
 
-		
+				{#if $authStore.role === 'admin' || $authStore.role === 'master_admin'}
+					<a href="/admin/roles">Rol Yönetimi</a>
+					<a href="/admin/users">Kullanıcı Banlama</a>
+					<a href="/admin/banks">Banka Hesapları</a>
+				{/if}
+			</nav>
+		</div> <div>
 			<hr class="nav-hr" />
 			<a href="/" class="back-to-site">← Ana Siteye Dön</a>
-		</nav>
-		</aside>
+		</div>
+	</aside>
 	<main class="admin-content">
 		<slot />
 	</main>
@@ -32,11 +40,10 @@
 		background: #f0f2f5;
 		padding: 1.5rem;
 		border-right: 1px solid #ddd;
-		/* --- YENİ EKLENEN STILLER --- */
+		/* Bu stiller, üst navigasyon ve alt "Ana Siteye Dön" linkini ayırır */
 		display: flex;
 		flex-direction: column;
-		justify-content: space-between; /* Bu, üst ve alt bölümü ayırır */
-		/* --- YENİ STILLER SONU --- */
+		justify-content: space-between;
 	}
 	.admin-sidebar h2 {
 		font-size: 1.2rem;
